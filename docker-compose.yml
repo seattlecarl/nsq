@@ -1,0 +1,40 @@
+version: "3.7"
+#  ./apps/q2qv2/q2qv2 --topic foo --nsqd-tcp-address nsqd:4150  --destination-topic foo2 --destination-nsqd-tcp-address  nsqd:4150
+#  ./apps/q2qv2/q2qv2 --topic foo --nsqd-tcp-address nsqd:4150  --destination-topic foo2 --destination-nsqd-tcp-address  nsqd:4150 -require-json-field foo
+#  curl http://nsqd:4151/stats
+#  echo '{"foo":"bar"}' | apps/to_nsq/to_nsq --topic foo --nsqd-tcp-address nsqd:4150
+#  echo '{"foo3":"bar3"}' | apps/to_nsq/to_nsq --topic foo --nsqd-tcp-address nsqd:4150
+#  /opt/nsq/bin/nsqd &
+# echo '{"required_field":"bar"}' | apps/to_nsq/to_nsq --topic foo --nsqd-tcp-address nsqd:4150
+services:
+  nsqshell:
+    image: "nsqio/nsq:v1.2.1-alpha-local"
+    init: true
+    entrypoint: sh -c 'while true ;do wait ;done'
+  nsqd:
+    image: "nsqio/nsq:v1.2.1-alpha-local"
+    init: true
+    entrypoint: /opt/nsq/bin/nsqd
+  q2qv2:
+    image: "nsqio/nsq:v1.2.1-alpha-local"
+    init: true
+    entrypoint: 
+      - ./apps/q2qv2/q2qv2 
+      - -producer-opt 
+      - client_id,q2qv2
+      - -topic
+      - foo
+      - -nsqd-tcp-address
+      - nsqd:4150
+      - -destination-topic
+      - destination_topic
+      - -destination-nsqd-tcp-address
+      - nsqd:4150
+      # - -require-json-field
+      # - required_field
+      - -partition-json-field
+      - required_field
+      - -partition-count
+      - "5"
+      - -unpartitionable-topic
+      - unhashable
